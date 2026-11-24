@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Список проектов{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Планирование работы</p>
+        <h1>Список проектов</h1>
+        <p class="muted">Выберите проект, чтобы посмотреть его задачи.</p>
+    </div>
+    {% if user.is_authenticated %}<a class="button" href="{% url 'tasks:project_create' %}">+ Новый проект</a>{% endif %}
+</section>
+
+<form method="get" class="search-form">
+    <input
+        type="search"
+        name="search"
+        value="{{ search_query }}"
+        placeholder="Поиск по названию или описанию"
+    >
+    <button class="button" type="submit">Найти</button>
+    {% if search_query %}
+        <a class="back-link" href="{% url 'tasks:list' %}">Сбросить</a>
+    {% endif %}
+</form>
+
+{% if projects %}
+    <div class="task-list">
+        {% for project in projects %}
+            <article class="task-card">
+                <div class="task-card-top">
+                    <span class="muted">Проект № {{ project.pk }}</span>
+                    <span class="muted">{{ project.start_date|date:"d.m.Y" }}</span>
+                </div>
+
+                <h2>
+                    <a href="{% url 'tasks:project_detail' project.pk %}">
+                        {{ project.name }}
+                    </a>
+                </h2>
+
+                <p>{{ project.description|truncatewords:30 }}</p>
+
+                <div class="task-meta">
+                    <span>Задач: {{ project.tasks.count }}</span>
+                    {% if project.end_date %}
+                        <span>Окончание: {{ project.end_date|date:"d.m.Y" }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="card-actions">
+                    <a href="{% url 'tasks:project_detail' project.pk %}">Подробнее</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'tasks:project_update' project.pk %}">Редактировать</a>
+                        <a href="{% url 'tasks:project_delete' project.pk %}">Удалить</a>
+                    {% endif %}
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+        <nav class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}page=1">Первая</a>
+                <a href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">Назад</a>
+            {% endif %}
+
+            <span>
+                Страница {{ page_obj.number }} из {{ paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">Вперёд</a>
+                <a href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}page={{ paginator.num_pages }}">Последняя</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+
+{% elif search_query %}
+    <div class="empty-state">
+        <h2>Проекты не найдены</h2>
+    </div>
+
+{% else %}
+    <div class="empty-state">
+        <h2>Пока проектов нет</h2>
+        <p>Создайте первый проект.</p>
+        {% if user.is_authenticated %}
+            <a class="button" href="{% url 'tasks:project_create' %}">Создать проект</a>
+        {% else %}
+            <a class="button" href="{% url 'login' %}">Войти, чтобы создать проект</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

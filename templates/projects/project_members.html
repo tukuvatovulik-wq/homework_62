@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Участники — {{ project.name }}{% endblock %}
+{% block content %}
+<div class="detail-card"><h1>Участники: {{ project.name }}</h1>
+<h2>Текущие участники</h2>
+<ul>{% for member in project.members.all %}<li>{{ member.username }} <form method="post" style="display:inline">{% csrf_token %}<input type="hidden" name="user_id" value="{{ member.pk }}"><input type="hidden" name="action" value="remove"><button type="submit">Удалить</button></form></li>{% empty %}<li>Пока никого.</li>{% endfor %}</ul>
+<h2>Добавить пользователя</h2>
+{% for candidate in users %}<form method="post">{% csrf_token %}<input type="hidden" name="user_id" value="{{ candidate.pk }}"><input type="hidden" name="action" value="add"><button type="submit">Добавить {{ candidate.username }}</button></form>{% empty %}<p>Нет пользователей для добавления.</p>{% endfor %}
+<a href="{% url 'tasks:project_detail' project.pk %}">Вернуться к проекту</a></div>
+{% endblock %}

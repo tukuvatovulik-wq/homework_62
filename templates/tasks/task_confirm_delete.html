@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Удаление задачи{% endblock %}
+{% block content %}
+<div class="form-wrap">
+    <h1>Удалить задачу?</h1>
+    <p>Задача «{{ object.title }}» будет скрыта из списка.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button class="button button-danger" type="submit">Удалить</button>
+        <a class="back-link" href="{% url 'tasks:detail' object.pk %}">Отмена</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="detail-card">
+    <a class="back-link" href="{% url 'tasks:list' %}">← К списку проектов</a>
+    <div class="task-card-top"><span class="muted">Проект № {{ project.pk }}</span></div>
+    <h1>{{ project.name }}</h1>
+    <dl class="details">
+        <dt>Дата начала</dt><dd>{{ project.start_date|date:"d.m.Y" }}</dd>
+        <dt>Дата окончания</dt><dd>{% if project.end_date %}{{ project.end_date|date:"d.m.Y" }}{% else %}Не указана{% endif %}</dd>
+    </dl>
+    <p class="lead">{{ project.description|linebreaksbr }}</p>
+    <h3>Участники проекта</h3>
+    {% if user.is_authenticated %}<a href="{% url 'tasks:project_members' project.pk %}">Управление участниками</a>{% endif %>
+    <ul>{% for member in project.members.all %}<li>{{ member.username }}{% if member.get_full_name %} — {{ member.get_full_name }}{% endif %}</li>{% empty %}<li>Участников пока нет.</li>{% endfor %}</ul>
+    {% if user.is_authenticated %}
+        <div class="card-actions">
+            <a href="{% url 'tasks:project_update' project.pk %}">Редактировать проект</a>
+            <a href="{% url 'tasks:project_delete' project.pk %}">Удалить проект</a>
+        </div>
+    {% endif %}
+</div>
+
+<section class="page-heading">
+    <div><h2>Задачи проекта</h2></div>
+    {% if user.is_authenticated %}<a class="button" href="{% url 'tasks:task_create' project.pk %}">+ Новая задача</a>{% endif %}
+</section>
+
+{% if tasks %}
+    <div class="task-list">
+        {% for task in tasks %}
+            <article class="task-card">
+                <div class="task-card-top">
+                    <span class="status status-{{ task.status }}">{{ task.get_status_display }}</span>
+                    <span class="muted">№ {{ task.pk }}</span>
+                </div>
+                <h2><a href="{% url 'tasks:detail' task.pk %}">{{ task.title }}</a></h2>
+                <p>{{ task.short_description }}</p>
+                <div class="task-meta">
+                    <span>Тип: {{ task.task_type.name }}</span>
+                    <span>Результат: {{ task.result.name }}</span>
+                </div>
+                <div class="card-actions">
+                    <a href="{% url 'tasks:detail' task.pk %}">Подробнее</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'tasks:update' task.pk %}">Редактировать</a>
+                        <a href="{% url 'tasks:delete' task.pk %}">Удалить</a>
+                    {% endif %}
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state"><h2>В этом проекте пока нет задач</h2></div>
+{% endif %}
+{% endblock %}

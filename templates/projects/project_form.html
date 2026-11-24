@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Редактирование проекта{% else %}Новый проект{% endif %}{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+    <a class="back-link" href="{% url 'tasks:list' %}">← К списку проектов</a>
+    <h1>{% if object %}Редактирование проекта{% else %}Создание проекта{% endif %}</h1>
+    <form method="post" class="task-form">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% for error in field.errors %}<p class="error">{{ error }}</p>{% endfor %}
+            </div>
+        {% endfor %}
+        <button class="button" type="submit">Сохранить</button>
+    </form>
+</div>
+{% endblock %}
